@@ -1,42 +1,36 @@
 (ns paren.serene-test
   (:require
+   [clojure.java.io :as io]
    [clojure.spec.alpha :as s]
-   [clojure.spec.test.alpha :as st]
    [clojure.string :as str]
    [clojure.test :as t]
    [clojure.test.check]
-   [clojure.walk :as walk]
+   [com.walmartlabs.lacinia :as lacinia]
+   [com.walmartlabs.lacinia.parser.schema :as lacinia.parser.schema]
+   [com.walmartlabs.lacinia.schema :as lacinia.schema]
    [paren.serene :as serene]
-   [paren.serene.schema :as schema]
-   #?@(:clj [[clojure.data.json :as json]
-             [clojure.java.io :as io]
-             [com.walmartlabs.lacinia :as lacinia]
-             [com.walmartlabs.lacinia.parser.schema :as lacinia.parser.schema]
-             [com.walmartlabs.lacinia.schema :as lacinia.schema]]
-       :cljs [[doo.runner :include-macros true]]))
-  #?(:cljs (:require-macros
-            [paren.serene-test :refer [test-spec test-specs]])))
+   [paren.serene.schema :as schema]))
 
 (s/check-asserts true)
 
-#?(:clj (defn ^:private get-introspection-query-response []
-          (let [sdl (-> "paren/serene/schema.graphql" io/resource slurp)
-                edn (lacinia.parser.schema/parse-schema sdl {})
-                edn (update edn :scalars (fn [scalars]
-                                           (->> scalars
-                                             (map (fn [[k v]]
-                                                    [k (assoc v
+(defn ^:private get-introspection-query-response []
+  (let [sdl (slurp (io/resource "paren/serene/schema.graphql"))
+        edn (lacinia.parser.schema/parse-schema sdl {})
+        edn (update edn :scalars (fn [scalars]
+                                   (->> scalars
+                                        (map (fn [[k v]]
+                                               [k (assoc v
                                                          :parse identity
                                                          :serialize identity)]))
-                                             (into {}))))
-                schema (lacinia.schema/compile edn)
-                resp (lacinia/execute schema schema/query {} {})]
-            resp)))
+                                        (into {}))))
+        schema (lacinia.schema/compile edn)
+        resp (lacinia/execute schema schema/query {} {})]
+    resp))
 
 (defn ^:private email? [x]
   (and
-    (string? x)
-    (str/includes? x "@")))
+   (string? x)
+   (str/includes? x "@")))
 
 (s/def ::email email?)
 
@@ -47,9 +41,9 @@
   [{:as m
     :keys [email username]}]
   (and
-    (map? m)
-    (or email username)
-    (not (and email username))))
+   (map? m)
+   (or email username)
+   (not (and email username))))
 
 (s/def ::map-of-email-or-username map-of-email-or-username?)
 
@@ -58,14 +52,14 @@
   [{:as m
     :keys [hasChild child]}]
   (and
-    (map? m)
-    (or
-      (and
-        (true? hasChild)
-        (iff-has-child-then-child? child))
-      (and
-        (false? hasChild)
-        (not (iff-has-child-then-child? child))))))
+   (map? m)
+   (or
+    (and
+     (true? hasChild)
+     (iff-has-child-then-child? child))
+    (and
+     (false? hasChild)
+     (not (iff-has-child-then-child? child))))))
 
 (s/def ::iff-has-child-then-child iff-has-child-then-child?)
 
@@ -146,11 +140,11 @@
       (test-spec :gql/Scalar_Any {:valid [1 1.0 true {} () nil :kw "str"]}))
     (t/testing "fields and input values"
       (test-specs
-        [:gql.InputObject_EmailOrUsername/email
-         :gql.Interface_EmailOrUsername/email
-         :gql.Object_EmailOrUsername/email]
-        {:valid ["email@example" nil]
-         :invalid ["example"]})
+       [:gql.InputObject_EmailOrUsername/email
+        :gql.Interface_EmailOrUsername/email
+        :gql.Object_EmailOrUsername/email]
+       {:valid ["email@example" nil]
+        :invalid ["example"]})
       (test-spec :gql.Mutation/createUser {:valid ["ID"]
                                            :invalid [nil 1 true]})
       (test-spec :gql.Query/randPosInt {:valid [1 42]
@@ -161,19 +155,19 @@
                                         :invalid ["str" 1]}))
     (t/testing "objects, interfaces, input objects, and args"
       (test-specs
-        [:gql/InputObject_EmailOrUsername
-         :gql/Interface_EmailOrUsername
-         :gql/Object_EmailOrUsername]
-        {:valid [{:id "ID"
-                  :email "email@example"}
-                 {:id "ID"
-                  :username "user"}]
-         :invalid [{:id "ID"}
-                   {:id "ID"
-                    :email "email@example"
-                    :username "user"}
-                   {:id "ID"
-                    :email true}]})
+       [:gql/InputObject_EmailOrUsername
+        :gql/Interface_EmailOrUsername
+        :gql/Object_EmailOrUsername]
+       {:valid [{:id "ID"
+                 :email "email@example"}
+                {:id "ID"
+                 :username "user"}]
+        :invalid [{:id "ID"}
+                  {:id "ID"
+                   :email "email@example"
+                   :username "user"}
+                  {:id "ID"
+                   :email true}]})
       (test-spec :gql.Query.randPosInt/&args {:valid [{:noDefault 1
                                                        :seed 1}]
                                               :invalid [{}
@@ -181,23 +175,23 @@
                                                         {:seed true}]}))
     (t/testing "union, union-returning fields, and interface-returning fields"
       (test-specs
-        [:gql/Interface_ID
-         :gql/Union_ID
-         :gql.Query/interfaceID
-         :gql.Query/unionID]
-        {:valid [{:id "ID"
-                  :email "email@example"}
-                 {:id "ID"
-                  :hasChild false}]
-         :invalid [{:id "ID"
-                    :hasChild false
-                    :child {:id "ID"
-                            :hasChild false}}]}))
+       [:gql/Interface_ID
+        :gql/Union_ID
+        :gql.Query/interfaceID
+        :gql.Query/unionID]
+       {:valid [{:id "ID"
+                 :email "email@example"}
+                {:id "ID"
+                 :hasChild false}]
+        :invalid [{:id "ID"
+                   :hasChild false
+                   :child {:id "ID"
+                           :hasChild false}}]}))
     (test-specs
-      [:gql.InputObject_EmailOrUsername/email
-       :gql.Interface_EmailOrUsername/email
-       :gql.Object_EmailOrUsername/email]
-      {:valid ["foo@bar"]
-       :invalid ["foobar"]})))
+     [:gql.InputObject_EmailOrUsername/email
+      :gql.Interface_EmailOrUsername/email
+      :gql.Object_EmailOrUsername/email]
+     {:valid ["foo@bar"]
+      :invalid ["foobar"]})))
 
 #?(:cljs (doo.runner/doo-tests))
