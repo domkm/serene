@@ -39,4 +39,7 @@ jobs:
         run: |
           mkdir -p target/consumer
           cd target/consumer
-          clojure -Srepro -Sdeps '{:deps {com.paren/serene {:local/root "../serene.jar"}}}' -M -e "(require 'paren.serene) (assert (seq paren.serene.schema/query))"
+          clojure -Srepro -Sdeps '{:deps {com.paren/serene {:local/root "../serene.jar"}}}' -M -e '
+            (require (quote paren.serene))
+            (assert (seq paren.serene.schema/query))
+            (assert (seq paren.serene.schema/query-with-deprecated-inputs))'

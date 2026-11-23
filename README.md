@@ -141,9 +141,11 @@ The file path and namespace are the first two arguments to `spit-specs`.
 (schema/fetch "https://api.github.com/graphql" {:headers {"Authorization" (str "bearer " gh-access-token)}})
 ```
 
+On servers that support introspection of deprecated inputs, pass `{:include-deprecated-inputs? true}` to retain deprecated field arguments, directive arguments, and input object fields. The default query omits this option because older servers can reject it.
+
 #### `paren.serene.schema/query`
 
-`query` is [this GraphQL introspection query string](https://github.com/paren-com/serene/blob/master/resources/main/paren/serene/IntrospectionQuery.graphql).
+`query` is the [bundled introspection query](resources/main/paren/serene/IntrospectionQuery.graphql). `query-with-deprecated-inputs` requests deprecated inputs on servers that support them.
 
 `fetch` works by asking the HTTP GraphQL server to execute `query`.
 
@@ -207,7 +209,7 @@ It is also not possible to always generate all fields, because objects can be cy
 
 #### Custom Compilation Options
 
-All compilation options are implemented and documented in [`paren.serene.compiler.transducers`](https://github.com/paren-com/serene/blob/master/sources/main/paren/serene/compiler/transducers.cljc).
+All compilation options are implemented and documented in [`paren.serene.compiler.transducers`](sources/main/paren/serene/compiler/transducers.cljc).
 
 Custom compilation options can be added in the same way that default options are provided.
 
@@ -216,7 +218,7 @@ Custom compilation options can be added in the same way that default options are
 Serene works in much the same way as [GraphiQL](https://github.com/graphql/graphiql) and other GraphQL tools; it uses GraphQL's introspection capabilities.
 GraphQL schemas are introspectable, meaning that you can query a running API to determine all of the capabilities of that API.
 
-Serene uses [this introspection query](https://github.com/paren-com/serene/blob/master/resources/main/paren/serene/IntrospectionQuery.graphql), which is conveniently defined as `paren.serene/introspection-query`, to generate specs that match your API.
+Serene uses [`paren.serene.schema/query`](#parensereneschemaquery) to request the schema it uses to generate specs.
 
 ## Development
 

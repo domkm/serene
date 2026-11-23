@@ -1,0 +1,9 @@
+directive @legacyFlag(legacy: Boolean @deprecated) on VARIABLE_DEFINITION
+
+input Filter {
+  legacy: String! = "default" @deprecated
+}
+
+type Query {
+  search(filter: Filter, legacy: Int @deprecated): String
+}
