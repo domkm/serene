@@ -1,6 +1,7 @@
 (ns paren.serene.schema
   (:require
    [clojure.spec.alpha :as s]
+   [clojure.string :as str]
    [clojure.walk :as walk]
    #?@(:clj [[clojure.data.json :as json]
              [clojure.java.io :as io]
@@ -130,8 +131,9 @@
                                 :QUERY
                                 :SCALAR
                                 :SCHEMA
-                                :SUBSCRIPTION
-                                :UNION}
+                                 :SUBSCRIPTION
+                                 :UNION
+                                 :VARIABLE_DEFINITION}
                      :kind vector?))
 
 (s/def ::name (s/nilable simple-keyword?))
@@ -214,14 +216,23 @@
 
 (def query (slurp-query))
 
+(def query-with-deprecated-inputs
+  "Introspection query for servers that support deprecated input values."
+  (str/replace query #"\b(args|inputFields) \{" "$1(includeDeprecated: true) {"))
+
 #?(:clj (defn fetch
+          "Fetches an introspection response. Set :include-deprecated-inputs? to true
+          for servers that support introspection of deprecated input values. Other
+          options are passed to http-kit and can override the default request."
           ([url]
            (fetch url {}))
-          ([url opts]
+          ([url {:keys [include-deprecated-inputs?] :as opts}]
            (-> {:url url
                 :method :post
-                :body (json/write-str {:query query})}
-             (merge opts)
+                :body (json/write-str {:query (if include-deprecated-inputs?
+                                               query-with-deprecated-inputs
+                                               query)})}
+              (merge (dissoc opts :include-deprecated-inputs?))
              http/request
              deref
              :body

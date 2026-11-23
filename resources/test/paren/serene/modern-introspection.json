@@ -1,0 +1,46 @@
+{
+  "data": {
+    "__typename": "Query",
+    "__schema": {
+      "__typename": "__Schema",
+      "queryType": {"name": "Query"},
+      "mutationType": null,
+      "subscriptionType": null,
+      "directives": [
+        {"__typename": "__Directive", "description": null, "name": "legacyFlag",
+         "locations": ["VARIABLE_DEFINITION"],
+         "args": [
+           {"__typename": "__InputValue", "defaultValue": null, "description": null, "name": "legacy",
+            "type": {"__typename": "__Type", "kind": "SCALAR", "name": "Boolean", "ofType": null}}
+         ]}
+      ],
+      "types": [
+        {"__typename": "__Type", "description": null, "kind": "INPUT_OBJECT", "name": "Filter",
+         "enumValues": null, "fields": null, "interfaces": null, "possibleTypes": null,
+         "inputFields": [
+           {"__typename": "__InputValue", "defaultValue": "\"default\"", "description": null, "name": "legacy",
+            "type": {"__typename": "__Type", "kind": "NON_NULL", "name": null,
+                     "ofType": {"__typename": "__Type", "kind": "SCALAR", "name": "String", "ofType": null}}}
+         ]},
+        {"__typename": "__Type", "description": null, "kind": "OBJECT", "name": "Query",
+         "enumValues": null, "inputFields": null, "interfaces": [], "possibleTypes": null,
+         "fields": [
+           {"__typename": "__Field", "deprecationReason": null, "description": null, "isDeprecated": false, "name": "search",
+            "type": {"__typename": "__Type", "kind": "SCALAR", "name": "String", "ofType": null},
+            "args": [
+              {"__typename": "__InputValue", "defaultValue": null, "description": null, "name": "filter",
+               "type": {"__typename": "__Type", "kind": "INPUT_OBJECT", "name": "Filter", "ofType": null}},
+              {"__typename": "__InputValue", "defaultValue": null, "description": null, "name": "legacy",
+               "type": {"__typename": "__Type", "kind": "SCALAR", "name": "Int", "ofType": null}}
+            ]}
+         ]},
+        {"__typename": "__Type", "description": null, "kind": "SCALAR", "name": "Boolean",
+         "enumValues": null, "fields": null, "inputFields": null, "interfaces": null, "possibleTypes": null},
+        {"__typename": "__Type", "description": null, "kind": "SCALAR", "name": "Int",
+         "enumValues": null, "fields": null, "inputFields": null, "interfaces": null, "possibleTypes": null},
+        {"__typename": "__Type", "description": null, "kind": "SCALAR", "name": "String",
+         "enumValues": null, "fields": null, "inputFields": null, "interfaces": null, "possibleTypes": null}
+      ]
+    }
+  }
+}

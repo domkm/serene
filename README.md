@@ -36,6 +36,7 @@ Generate [clojure.spec](https://clojure.org/about/spec) with [GraphQL](https://g
             - [`:gen-object-fields`](#gen-object-fields)
             - [Custom Compilation Options](#custom-compilation-options)
     - [How It Works](#how-it-works)
+    - [Development](#development)
     - [Status](#status)
     - [License](#license)
 
@@ -73,6 +74,8 @@ If other languages can leverage GraphQL to this extent, Clojure should be able t
 Serene aims to address this.
 
 ## Usage
+
+ClojureScript projects must declare their own `org.clojure/clojurescript` dependency. Serene does not supply the compiler.
 
 ### Generated Spec Names
 
@@ -140,9 +143,11 @@ The file path and namespace are the first two arguments to `spit-specs`.
 (schema/fetch "https://api.github.com/graphql" {:headers {"Authorization" (str "bearer " gh-access-token)}})
 ```
 
+On servers that support introspection of deprecated inputs, pass `{:include-deprecated-inputs? true}` to retain deprecated field arguments, directive arguments, and input object fields. The default query omits this option because older servers can reject it.
+
 #### `paren.serene.schema/query`
 
-`query` is [this GraphQL introspection query string](https://github.com/paren-com/serene/blob/master/resources/main/paren/serene/IntrospectionQuery.graphql).
+`query` is the [bundled introspection query](resources/main/paren/serene/IntrospectionQuery.graphql). `query-with-deprecated-inputs` requests deprecated inputs on servers that support them.
 
 `fetch` works by asking the HTTP GraphQL server to execute `query`.
 
@@ -206,7 +211,7 @@ It is also not possible to always generate all fields, because objects can be cy
 
 #### Custom Compilation Options
 
-All compilation options are implemented and documented in [`paren.serene.compiler.transducers`](https://github.com/paren-com/serene/blob/master/sources/main/paren/serene/compiler/transducers.cljc).
+All compilation options are implemented and documented in [`paren.serene.compiler.transducers`](sources/main/paren/serene/compiler/transducers.cljc).
 
 Custom compilation options can be added in the same way that default options are provided.
 
@@ -215,7 +220,34 @@ Custom compilation options can be added in the same way that default options are
 Serene works in much the same way as [GraphiQL](https://github.com/graphql/graphiql) and other GraphQL tools; it uses GraphQL's introspection capabilities.
 GraphQL schemas are introspectable, meaning that you can query a running API to determine all of the capabilities of that API.
 
-Serene uses [this introspection query](https://github.com/paren-com/serene/blob/master/resources/main/paren/serene/IntrospectionQuery.graphql), which is conveniently defined as `paren.serene/introspection-query`, to generate specs that match your API.
+Serene uses [`paren.serene.schema/query`](#parensereneschemaquery) to request the schema it uses to generate specs.
+
+## Development
+
+Install the [Clojure CLI](https://clojure.org/guides/install_clojure), JDK 25, and Node.js 24 LTS to match CI.
+
+```sh
+clojure -M:test -m paren.test-runner
+clojure -M:test -m cljs.main -t node -d target/cljs-test -o target/cljs-test.js -c paren.test-runner
+node target/cljs-test.js
+clojure -T:build jar
+```
+
+Register new test namespaces in [`paren.test-runner`](sources/test/paren/test_runner.cljc) so CI runs them. Use `clj -M:test:dev` for a REPL with the development helpers.
+
+The build writes `target/serene.jar`. Run `clojure -T:build install` to build and install the JAR and its POM into your local Maven repository.
+
+### Publishing
+
+Set the release version in [`build.clj`](build.clj) and run `clojure -T:build jar`. In `~/.m2/settings.xml`, configure a server with ID `clojars`, your Clojars username, and a [deploy token](https://github.com/clojars/clojars-web/wiki/Deploy-Tokens) as the password. Then publish the JAR and its generated POM:
+
+```sh
+mvn deploy:deploy-file \
+  -Dfile=target/serene.jar \
+  -DpomFile=target/jar/META-INF/maven/com.paren/serene/pom.xml \
+  -DrepositoryId=clojars \
+  -Durl=https://clojars.org/repo
+```
 
 ## Status
 

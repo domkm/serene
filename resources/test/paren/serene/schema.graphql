@@ -11,7 +11,7 @@ interface Interface_EmailOrUsername {
   username(downcase: Boolean! = false): String
 }
 
-type Object_EmailOrUsername implements Interface_EmailOrUsername Interface_ID {
+type Object_EmailOrUsername implements Interface_EmailOrUsername & Interface_ID {
   id: ID!
   email: Scalar_Email
   username(downcase: Boolean! = false): String
@@ -19,13 +19,18 @@ type Object_EmailOrUsername implements Interface_EmailOrUsername Interface_ID {
 
 input InputObject_EmailOrUsername {
   email: Scalar_Email
-  username(downcase: Boolean! = false): String
+  username: String
 }
 
 type Object_IffHasChildThenChild implements Interface_ID {
   id: ID!
   hasChild: Boolean!
   child: Object_IffHasChildThenChild
+}
+
+type Object_Recursive {
+  label: String!
+  child: Object_Recursive!
 }
 
 union Union_ID = Object_EmailOrUsername | Object_IffHasChildThenChild

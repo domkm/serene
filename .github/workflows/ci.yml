@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - uses: DeLaGuardo/setup-clojure@6d46099eae24853c33c0482f2bb54edf4f1a4c74 # 13.7.0
+        with:
+          cli: '1.12.7.1681'
+      - name: Test on the JVM
+        run: clojure -M:test -m paren.test-runner
+      - name: Test on Node.js
+        run: |
+          clojure -M:test -m cljs.main -t node -d target/cljs-test -o target/cljs-test.js -c paren.test-runner
+          node target/cljs-test.js
+      - name: Build and install the JAR
+        run: clojure -T:build install
+      - name: Load the JAR from a separate project
+        run: |
+          mkdir -p target/consumer
+          cd target/consumer
+          clojure -Srepro -Sdeps '{:deps {com.paren/serene {:local/root "../serene.jar"}}}' -M -e '
+            (require (quote paren.serene))
+            (assert (nil? (clojure.java.io/resource "cljs/main.clj")))
+            (assert (seq paren.serene.schema/query))
+            (assert (seq paren.serene.schema/query-with-deprecated-inputs))'

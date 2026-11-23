@@ -1,6 +1,7 @@
 (ns paren.serene-test
   (:require
    [clojure.spec.alpha :as s]
+   [clojure.spec.gen.alpha :as sg]
    [clojure.spec.test.alpha :as st]
    [clojure.string :as str]
    [clojure.test :as t]
@@ -11,9 +12,8 @@
    #?@(:clj [[clojure.data.json :as json]
              [clojure.java.io :as io]
              [com.walmartlabs.lacinia :as lacinia]
-             [com.walmartlabs.lacinia.parser.schema :as lacinia.parser.schema]
-             [com.walmartlabs.lacinia.schema :as lacinia.schema]]
-       :cljs [[doo.runner :include-macros true]]))
+              [com.walmartlabs.lacinia.parser.schema :as lacinia.parser.schema]
+              [com.walmartlabs.lacinia.schema :as lacinia.schema]]))
   #?(:cljs (:require-macros
             [paren.serene-test :refer [test-spec test-specs]])))
 
@@ -72,6 +72,9 @@
 (def ^:private defined-specs
   (serene/def-specs (get-introspection-query-response)
     {:prefix :gql
+     :alias {:Query #{:api/query :api.query/root}
+             :Query/randPosInt :api.query/rand-int}
+     :gen-object-fields {:Object_Recursive 1}
      :extend {:Query/randPosInt            `pos-int?
               :InputObject_EmailOrUsername ::map-of-email-or-username
               :Interface_EmailOrUsername   ::map-of-email-or-username
@@ -90,6 +93,19 @@
   `(do
      ~@(for [spec specs]
          `(test-spec ~spec ~examples))))
+
+(t/deftest aliased-specs-test
+  (t/is (= ::Query (s/get-spec :api/query)))
+  (t/is (= ::Query (s/get-spec :api.query/root)))
+  (t/is (= :paren.serene-test.Query/randPosInt (s/get-spec :api.query/rand-int)))
+  (t/is (s/valid? :api.query/rand-int 1))
+  (t/is (not (s/valid? :api.query/rand-int 0))))
+
+(t/deftest recursive-generator-test
+  (let [generated (sg/generate (s/gen :gql/Object_Recursive))]
+    (t/is (= "Object_Recursive" (:__typename generated)))
+    (t/is (string? (:label generated)))
+    (t/is (= {:__typename "Object_Recursive"} (:child generated)))))
 
 (t/deftest defschema-test
   (t/testing "specs and aliases are defined"
@@ -197,7 +213,5 @@
       [:gql.InputObject_EmailOrUsername/email
        :gql.Interface_EmailOrUsername/email
        :gql.Object_EmailOrUsername/email]
-      {:valid ["foo@bar"]
-       :invalid ["foobar"]})))
-
-#?(:cljs (doo.runner/doo-tests))
+         {:valid ["foo@bar"]
+          :invalid ["foobar"]})))
