@@ -33,13 +33,14 @@ jobs:
         run: |
           clojure -M:test -m cljs.main -t node -d target/cljs-test -o target/cljs-test.js -c paren.test-runner
           node target/cljs-test.js
-      - name: Build the JAR
-        run: clojure -T:build jar
+      - name: Build and install the JAR
+        run: clojure -T:build install
       - name: Load the JAR from a separate project
         run: |
           mkdir -p target/consumer
           cd target/consumer
           clojure -Srepro -Sdeps '{:deps {com.paren/serene {:local/root "../serene.jar"}}}' -M -e '
             (require (quote paren.serene))
+            (assert (nil? (clojure.java.io/resource "cljs/main.clj")))
             (assert (seq paren.serene.schema/query))
             (assert (seq paren.serene.schema/query-with-deprecated-inputs))'

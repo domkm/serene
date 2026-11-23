@@ -75,6 +75,8 @@ Serene aims to address this.
 
 ## Usage
 
+ClojureScript projects must declare their own `org.clojure/clojurescript` dependency. Serene does not supply the compiler.
+
 ### Generated Spec Names
 
 Spec names are keywords that are prefixed and namespaced by their position in the schema.
@@ -231,7 +233,21 @@ node target/cljs-test.js
 clojure -T:build jar
 ```
 
-The build writes `target/serene.jar`. Use `clj -M:test:dev` for a REPL with the development helpers.
+Register new test namespaces in [`paren.test-runner`](sources/test/paren/test_runner.cljc) so CI runs them. Use `clj -M:test:dev` for a REPL with the development helpers.
+
+The build writes `target/serene.jar`. Run `clojure -T:build install` to build and install the JAR and its POM into your local Maven repository.
+
+### Publishing
+
+Set the release version in [`build.clj`](build.clj) and run `clojure -T:build jar`. In `~/.m2/settings.xml`, configure a server with ID `clojars`, your Clojars username, and a [deploy token](https://github.com/clojars/clojars-web/wiki/Deploy-Tokens) as the password. Then publish the JAR and its generated POM:
+
+```sh
+mvn deploy:deploy-file \
+  -Dfile=target/serene.jar \
+  -DpomFile=target/jar/META-INF/maven/com.paren/serene/pom.xml \
+  -DrepositoryId=clojars \
+  -Durl=https://clojars.org/repo
+```
 
 ## Status
 

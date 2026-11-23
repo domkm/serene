@@ -5,7 +5,7 @@ All notable changes to Serene will be documented here. This change log mostly fo
 
 ### Changed
 - Replaced Boot with the Clojure CLI and `tools.build`. CI tests Clojure on JDK 25 and ClojureScript on Node.js 24.
-- Updated to Clojure 1.12 and ClojureScript 1.12.
+- Updated to Clojure 1.12. CI tests with ClojureScript 1.12, but ClojureScript consumers must declare their own compiler dependency.
 
 ### Added
 - Added an opt-in introspection query that retains deprecated inputs on servers that support them.
