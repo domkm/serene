@@ -12,16 +12,15 @@
 ;; Returns a transducer that will add aliased specs.
 (defmethod compiler/transducer :alias [_ alias-fn]
   (mapcat (fn [spec]
-            (->> spec
-              ::compiler/schema-key
-              alias-fn
-              list
-              flatten
-              (map (partial assoc spec
-                     ::alias? true
-                     ::compiler/form (::compiler/name spec)
-                     ::compiler/name))
-              (cons spec)))))
+            (let [aliases (when-not (::alias? spec)
+                            (alias-fn (::compiler/schema-key spec)))]
+              (cons spec
+                (for [alias (flatten (if (coll? aliases) (seq aliases) [aliases]))
+                      :when (some? alias)]
+                  (assoc spec
+                    ::alias? true
+                    ::compiler/form (::compiler/name spec)
+                    ::compiler/name alias)))))))
 
 ;; Takes a function (or map) that will receive a spec schema key
 ;; and should return a new prefx to replace `*ns*` or `nil`.
