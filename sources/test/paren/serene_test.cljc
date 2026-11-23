@@ -11,9 +11,8 @@
    #?@(:clj [[clojure.data.json :as json]
              [clojure.java.io :as io]
              [com.walmartlabs.lacinia :as lacinia]
-             [com.walmartlabs.lacinia.parser.schema :as lacinia.parser.schema]
-             [com.walmartlabs.lacinia.schema :as lacinia.schema]]
-       :cljs [[doo.runner :include-macros true]]))
+              [com.walmartlabs.lacinia.parser.schema :as lacinia.parser.schema]
+              [com.walmartlabs.lacinia.schema :as lacinia.schema]]))
   #?(:cljs (:require-macros
             [paren.serene-test :refer [test-spec test-specs]])))
 
@@ -197,7 +196,5 @@
       [:gql.InputObject_EmailOrUsername/email
        :gql.Interface_EmailOrUsername/email
        :gql.Object_EmailOrUsername/email]
-      {:valid ["foo@bar"]
-       :invalid ["foobar"]})))
-
-#?(:cljs (doo.runner/doo-tests))
+         {:valid ["foo@bar"]
+          :invalid ["foobar"]})))

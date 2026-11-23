@@ -1,5 +1,6 @@
 *.class
 *.jar
+/.cpcache/
 /.lein-*
 /.nrepl-history
 /.nrepl-port

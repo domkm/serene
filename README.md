@@ -36,6 +36,7 @@ Generate [clojure.spec](https://clojure.org/about/spec) with [GraphQL](https://g
             - [`:gen-object-fields`](#gen-object-fields)
             - [Custom Compilation Options](#custom-compilation-options)
     - [How It Works](#how-it-works)
+    - [Development](#development)
     - [Status](#status)
     - [License](#license)
 
@@ -216,6 +217,19 @@ Serene works in much the same way as [GraphiQL](https://github.com/graphql/graph
 GraphQL schemas are introspectable, meaning that you can query a running API to determine all of the capabilities of that API.
 
 Serene uses [this introspection query](https://github.com/paren-com/serene/blob/master/resources/main/paren/serene/IntrospectionQuery.graphql), which is conveniently defined as `paren.serene/introspection-query`, to generate specs that match your API.
+
+## Development
+
+Install the [Clojure CLI](https://clojure.org/guides/install_clojure), JDK 25, and Node.js 24 LTS to match CI.
+
+```sh
+clojure -M:test -m paren.test-runner
+clojure -M:test -m cljs.main -t node -d target/cljs-test -o target/cljs-test.js -c paren.test-runner
+node target/cljs-test.js
+clojure -T:build jar
+```
+
+The build writes `target/serene.jar`. Use `clj -M:test:dev` for a REPL with the development helpers.
 
 ## Status
 
